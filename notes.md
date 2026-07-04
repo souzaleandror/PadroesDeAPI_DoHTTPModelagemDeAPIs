@@ -865,3 +865,261 @@ Aprendemos as propriedades de cada método (ou verbo) HTTP, entendendo quais sã
 Conhecemos os status de resposta do protocolo HTTP, entendendo o que cada intervalo quer dizer;
 Entendemos a importância dos cabeçalhos e como eles normalmente podem ser utilizados por APIs.
 
+#04/07/2026
+
+@03-Padrões de API
+
+@@01-Padrões antigos
+
+Na aula anterior, aprendemos sobre HTTP. Agora, discutiremos um pouco sobre padrões de API.
+
+Quando modelamos uma API, precisamos tomar muitas decisões, como, por exemplo, qual URL utilizar e como realizar cada operação baseada em cada método HTTP.
+
+Nesse caso, estamos utilizando uma API que segue um padrão bastante conhecido e utiliza os métodos HTTP para identificar as operações que serão realizadas no recurso utilizado na URL.
+
+Evolução dos Padrões de API
+
+No entanto, nem sempre foi assim. Esse padrão, que hoje é praticamente o mais conhecido e difundido, nem sempre foi o padrão. Existiam diversas formas que as pessoas utilizavam para criar APIs e serviços na web que outros serviços pudessem consumir.
+
+Por exemplo, estamos utilizando o método GET para informar que o que queremos fazer é buscar um dado, e na URL informamos qual dado, qual recurso queremos buscar.
+
+Padrão RPC
+
+Porém, anteriormente era comum utilizar um padrão chamado RPC, Remote Procedure Call, a Chamada de Procedimento Remoto. Nisso, enviávamos requisições do tipo POST e na URL, ao invés de dizer o que queremos manipular, informávamos qual ação queríamos realizar, ou qual função queríamos chamar.
+
+Seguindo esse raciocínio, o fim da URL poderia ser "recuperarTodosOsCursos". Então, informávamos a operação que queríamos executar, e isso era conhecido como padrão RPC.
+
+Repare que, muitas vezes, a semântica do HTTP não era seguida. Queremos buscar um recurso, mas estamos enviando um POST. Isso era feito dessa forma, pois estamos enviando uma execução. Então, o retorno pode ser diferente a cada execução.
+
+Isso não é uma violação do protocolo HTTP, mas não é muito intuitivo. Porém, essa prática foi um padrão por muito tempo. Tanto que surgiram diversos protocolos em cima desse padrão.
+
+Protocolo SOAP
+
+Um que ficou muito famoso é o SOAP. O protocolo SOAP foi criado por algumas pessoas que trabalhavam na Microsoft e foi mantido como um protocolo aberto na web até aproximadamente 2009.
+
+Esse era um protocolo para a comunicação entre serviços HTTP, para a criação de API, com um formato bem específico. Utilizávamos XML bem formatado para identificar as chamadas de métodos de procedimentos.
+
+Analisando a documentação, notamos que o tipo, o content type, era soap+xml, um formato bem específico. Além disso, dentro de um envelope SOAP, tínhamos o body, onde informávamos qual função queríamos executar no servidor.
+
+Nesse exemplo, está sendo executado uma função chamada GetStockPrice e passando um parâmetro StockName com o valor IBM. A resposta seria um objeto, um recurso do tipo GetStockPriceResponse com a propriedade price, tendo o valor.
+
+Isso era bastante comum e foram criados vários frameworks em cima desse protocolo. Vamos simular um exemplo no corpo da requisição como se fosse um código em JavaScript ou qualquer linguagem.
+
+Suponhamos que temos um clienteSoap = ..., criado de forma com que se conecte ao servidor. Nesse cliente, chamamos a função como se estivéssemos executando diretamente no código, clientSoap.GetStockPrice(), passando nos parênteses IBM. Nesse caso, a resposta seira um objeto ou algo relacionado. Assim, conseguíamos pegar a resposta.Price.
+
+
+Copiar
+clienteSoap = ...
+resposta = clientSoap.GetStockPrice('IBM')
+resposta.Price
+
+Esse foi um padrão bastante utilizado. Porém, como mencionamos, ele foi mantido até aproximadamente 2009. Atualmente não é um padrão muito conhecido e utilizado.
+
+Nas andanças do mundo web, talvez você encontre um web service ou outro utilizando SOAP. Porém, não é comum. Atualmente, utilizamos os métodos HTTP para informar o que queremos executar. Já o tipo de dado que queremos manipular, utilizamos na URL.
+
+Esse é um dos princípios de outro padrão que, hoje em dia, é o mais comum. Não é a única opção atual ou moderna, mas é a mais conhecida. Vamos explorar o REST no vídeo seguinte.
+
+Até lá!
+
+@@02-APIs RESTful
+
+Como mencionamos no vídeo anterior, durante muito tempo não tínhamos regras bem definidas de como criar uma API. Remote Procedure Calls era um padrão bastante conhecido para a criação de APIs e o SOAP surgiu como um protocolo de implementação
+
+Existiram outros protocolos e outras formas de chamar APIs, mas esses dois eram bem conhecidos.
+
+Utilização do REST
+
+No entanto, a web evoluiu e redescobriu uma tese de doutorado sobre padrões arquiteturais para comunicação entre aplicações web do ano 2000.
+
+Essa tese de doutorado foi intitulada como "Architecture Styles and design for Network-based Software Architectures", Estilos de Arquitetura e Design para Arquiteturas de Software Baseadas em Rede.
+
+Nessa dissertação para doutorado, o termo REST foi cunhado e depois foi revivido anos depois. Embora o termo REST já existisse desde 2000, que foi o ano da apresentação dessa tese, REST realmente ficou mais famoso na década de 2010. Tanto é que o SOAP foi mantido até 2009, depois foi descontinuado.
+
+O padrão REST, que significa Representational State Transfer, Transferência de Estado Representacional. Ele prega a ideia de se utilizar da especificação do HTTP com tudo que ele traz de vantagens e suprindo algumas carências com alguns detalhes a mais. Um exemplo é a utilização de hipermídia.
+
+A ideia principal do REST é transferência de estados. Quando estamos criando uma aplicação que utiliza o padrão REST, sempre temos que pensar nisso. Não estamos chamando uma função ou executando um procedimento, estamos transferindo estado.
+
+Por isso, se queremos recuperar algo, queremos recuperar o estado dos nossos recursos. Não atualizamos um curso, enviamos o novo estado em que esse curso precisa estar. Essa é a ideia por trás de REST.
+
+Quando uma API segue todos os princípios REST, dizemos que ela é uma API RESTful. É um termo que utiliza REST e um sufixo do inglês que é basicamente uma API que segue padrões REST.
+
+A API do MockAPI.io, por exemplo, tenta ser uma API RESTful, ao seguir alguns padrões arquitetural REST. Mesmo não seguindo todos, por exemplo, o PUT não segue a risca a especificação do HTTP. Ela abre mão desses detalhes por simplicidade, para a implementação ser mais fácil, mas segue boa parte o padrão REST.
+
+Nela, trabalhamos com recursos. Nesse caso, o recurso que estamos trabalhando agora é cursos. Então dizemos qual operação queremos realizar através dos métodos HTTP e não por meio de uma chamada remota. Por exemplo, GET curso, UPDATE curso ou algo relacionado.
+
+Essa é a forma mais comum de criar aplicações, de criar APIs atualmente, embora não seja a única, nem a mais recomendada para todos os casos.
+
+Se você criar uma API, muito provavelmente será uma API REST. Caso precise consumir uma API que já existe, ou então entre em uma empresa para dar manutenção a uma API existente, provavelmente será uma API seguindo alguns dos padrões REST.
+
+Por isso é muito importante conhecer esse padrão quando estamos trabalhando com APIs. Na Alura você encontra vários cursos utilizando linguagens diferentes, seguindo as ideias do REST.
+
+É interessante conhecer todas as restrições e minúcias, mas às vezes abrimos mão pela flexibilidade e facilidade de implementação.
+
+O padrão REST surgiu em 2000 e ficou mais famoso recentemente. Sua ideia é transferência de estado, por isso utilizamos os métodos HTTP para informar o que queremos realizar em cada um dos recursos.
+
+O recurso é a base de uma API REST. Nisso, podemos ter sub recursos e hipermídia além de somente as informações do recurso em si.
+
+Mas, como mencionamos em alguns momentos, existem outras opções, inclusive modernas. Então além do REST, o que mais poderíamos utilizar atualmente para criar uma API que talvez não fosse atendido pelo REST?
+
+Conversaremos sobre outras possibilidades no próximo vídeo.
+
+Até lá!
+
+@@003-Outras possibilidades
+
+Nos vídeos anteriores, falamos sobre padrões antigos, como RPC e uma implementação utilizando SOAP. Também discutimos a atualidade e o padrão REST e a criação de APIs RESTful.
+
+No entanto, existem outras opções. Agora, conheceremos um pouco sobre alternativas às APIs RESTful.
+
+Por exemplo, imagine o seguinte cenário: estamos desenvolvendo uma API e queremos recuperar os cursos. Cada um dos cursos possui estudantes matriculados e cada estudante possui telefones.
+
+Queremos buscar o telefone de todas as pessoas estudantes que fizeram determinado curso. Então, em uma API REST, precisaríamos de algumas requisições. Primeiro, buscaríamos o curso em si e pegaríamos o ID dele.
+
+Depois, buscaríamos todas as pessoas estudantes que fazem parte do curso com o ID específico. Após buscar todas essas pessoas estudantes, teríamos acesso ao telefone.
+
+Perceba que precisaríamos transferir muita informação, já que estamos realizando uma transferência de estados dos nossos recursos, que são> cursos, estudantes e telefones.
+
+Mas, se quiséssemos pegar diretamente esses telefones, teríamos muito trabalho e fugiríamos do padrão REST. O objetivo por trás do padrão que citaremos agora é justamente essa busca ou inserção, ou seja, trabalhar com uma modelagem um pouco mais flexível e possivelmente complexa.
+
+Modelo GraphQL
+
+Estamos falando do GraphQL, um modelo para criar APIs de forma mais flexível. Você descreve como um dado seu pode se parecer. Para entender melhor, no navegador acessamos a página do graphql.org.
+
+Nela, é exibida um tipo produto que possui nome, tagline e contribuidores, que é uma lista de usuários. Podemos realizar queries ou adicionar informações, enviar mutações.
+
+Em uma query, recuperamos dados e podemos informar que, por exemplo, queremos buscar de um projeto todos os e-mails de contribuidores de determinado projeto.
+
+
+Copiar
+type Project {
+    name: String
+    tagline: String
+    contribuitors: [User]
+}
+
+Nesse caso, criaríamos uma query e recuperaríamos somente o e-mail. Isso traz um pouco mais de flexibilidade para buscar somente o que precisamos.
+
+Nos cenários onde precisamos buscar recursos aninhados de forma mais específica, o GraphQL pode ser interessante. Existem alguns memes e algumas brincadeiras porque o GraphQL não segue tão à risca a especificação do HTTP como o padrão REST pede para seguir.
+
+Por exemplo, todas as requisições do GraphQL são enviadas como POST e todas as respostas são 200, independente de ter um erro ou não. Precisamos analisar o corpo da requisição para saber se é uma consulta ou se é uma mutação dos nossos dados e precisamos consultar o corpo da resposta para saber se é sucesso ou erro.
+
+Outra brincadeira que muitas pessoas fazem é sobre o fato disso ser como um acesso direto ao banco de dados, um SQL que a pessoa cliente pode acessar. Não é realmente verdade porque criamos o código que pode acessar determinados dados, mas basicamente a pessoa cliente fica responsável por pedir o que ela quer e saber como buscar cada uma das informações. Fornecemos a interface para ela se comunicar, mas ela precisa saber como recuperar cada um dos dados.
+
+Isso possui suas vantagens, que é a flexibilidade de buscar somente os dados que queremos, mas tem as desvantagens. É um pouco mais complexo de implementar e traz um pouco mais de responsabilidade para a pessoa cliente. Como tudo na computação é um trade-off, precisamos balancear o que pesa mais.
+
+Outra opção bastante diferente, inclusive tanto de REST quanto de GraphQL, volta um pouco para o RPC como comentamos, só que de forma bem mais moderna.
+
+Um dos problemas do SOAP era a verbosidade. O XML que mostramos tinha muita informação que muitas das vezes não era necessário. Conforme a web foi evoluindo e precisando de mais performance, não fazia mais sentido.
+
+GRPC da Google
+
+Porém, o padrão RPC continua sendo interessante, então a Google lançou um protocolo chamado GRPC. Ele é, na verdade, um framework para criar serviços, web services ou APIs, consiste em várias tecnologias trabalhando juntas.
+
+Um serviço criado com o GRPC utiliza compressão por padrão e pode trabalhar com HTTP2. Ele, embora possa utilizar qualquer formato, utiliza um bem específico por padrão, que pode ser binário. Isso facilita a compressão desses dados, além de ser focado em performance.
+
+Como a ideia é ser de RPC, de Remote Procedure Call, no código parece que estamos chamando um método qualquer, uma função qualquer. Existem para várias linguagens, por exemplo, C Sharp, Java, PHP, Node, enfim, várias linguagens, mas pegaremos um exemplo em Java para analisar.
+
+
+Copiar
+// Creating a request with the user's name.
+HelloRequest request = HelloRequest.newBuilder().setName (name).build
+HelloReply response;
+try {
+    // Call the original method on the server.
+    response = blockingStub.sayHello(request);
+} catch (StatusRuntimeException e) {
+    // Log a warning if the RPC fails.
+    logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
+    return;
+}
+
+Seguindo o exemplo da documentação, criamos um objeto do tipo Request, que foi definido em um arquivo de definição. Temos um objeto de tipo response e chamamos uma função que está no servidor, chamada sayHello.
+
+Perceba que estamos chamando uma função como se fosse um código local. Só que o ponto response = blockingStub.sayHello(request), está executando uma chamada remota, uma RPC para o nosso servidor.
+
+Isso tudo é feito pensando em performance, com compressão e em um formato bem otimizado. Normalmente o GRPC é utilizado quando precisamos de uma latência muito baixa e serviços muito críticos.
+
+Isso é utilizado para comunicação entre serviços e não, por exemplo, do navegador para um servidor. Quando temos uma arquitetura de micro serviços e precisamos de muita performance na comunicação entre serviços, GRPC pode ser uma boa escolha.
+
+As desvantagens desse framework, são a complexidade de implementação. Precisamos de ferramentas específicas para gerar uma parte do código, o formato binário. Ele traz uma complexidade um pouco maior e precisa de uma infraestrutura um pouco diferente, em alguns casos, dependendo da linguagem.
+
+A principal desvantagem é a complexidade, mas no código em si, perceba que fica até bastante simples de utilizar. É um protocolo bem interessante para se estudar.
+
+Webhook como outra alternativa
+
+Além de protocolos e formatos de trabalhar e criar uma API, ainda existem comunicações mais pontuais que podemos ter fornecendo uma API. Por exemplo, imagine que queremos nos integrar com o GitHub. A cada vez que alguém fizer um push, enviar um código para um repositório do GitHub, queremos que a aplicação seja avisada.
+
+Uma forma de fazer isso é expor um endpoint, ou seja, uma URL na API que o próprio GitHub ou qualquer outro serviço acessará. Esse padrão é chamado Webhook, enganchar serviços na web.
+
+Em um texto de um blog, encontramos uma imagem bem descritiva. Vamos analisá-la:
+
+<img src="https://cdn1.gnarususercontent.com.br/1/795715/7d5b0571-4a58-41c3-b2ea-dc5519d88863.png" alt="Diagrama de fluxo simplificado de integração contínua mostrando três componentes principais. À esquerda, um ícone de um computador com a palavra "developer" (desenvolvedor), do qual sai uma seta com a legenda "git push" apontando para um ícone central que representa o GitHub com seu logotipo característico de um gato estilizado. Do GitHub, partem duas setas: uma retornando ao ícone do computador rotulada "Webhook event" e a outra apontando para a direita, para um ícone de um servidor com a palavra "server" (servidor). Acima desta seta estão as palavras "git pull & build.sh"." crossorigin="anonymous" />
+
+Na lateral direita da imagem, encontramos o servidor. Ele irá expor um endpoint no formato que o GitHub espera. Quando alguém enviar código para o GitHub, ele irá avisar, ou seja, o GitHub faz uma requisição para a API.
+
+Esse padrão de comunicação se chama webhook. Nele, o GitHub pode esperar que a API utilize padrões REST, mas outro serviço pode esperar que a API esteja em um formato de RPC. Então, conseguiremos integrar baseado nesse provedor, no que queremos ouvir de eventos.
+
+Estudamos alguns padrões de API. Incluindo os mais antigos, como o SOAP, um atual, como o REST e outros mais modernos, como o GraphQL de RPC. O webhook é um cenário um pouco diferente, mas ainda assim é uma forma de integrar serviços.
+
+A seguir, conheceremos um pouco sobre modelagem de APIs e como tomar algumas decisões sobre como realizar filtros de dados.
+
+Te esperamos na aula seguinte!
+
+@@04-Quando usar
+DISCUTIR NO FÓRUM
+Júlia precisa desenvolver uma nova API de um microsserviço e está se perguntando se segue o bom e velho padrão REST ou se usa algo “diferente” como GraphQL ou gRPC.
+
+Quando devemos utilizar um dos padrões diferentes, como GraphQL e gRPC?
+
+Selecione uma alternativa:
+
+A
+Sempre que possível devemos utilizar esses padrões já que são mais modernos.
+
+
+B
+Quando temos necessidades específicas como baixa latência, para GraphQL, ou acesso mais flexível aos dados, para gRPC.
+
+
+Quando temos necessidades específicas como baixa latência, para gRPC, ou acesso mais flexível aos dados, para GraphQL.
+
+Os padrões que fogem à regra do REST devem ser utilizados quando temos alguma necessidade específica. O padrão gRPC tem como foco a performance, diminuindo a latência na comunicação de rede usando um protocolo mais eficiente. Já o GraphQL visa um acesso mais flexível aos dados, dando mais poder ao cliente.
+
+
+D
+Sempre que possível devemos utilizar REST já que é um padrão mais consolidado.
+
+@@05-Mão na massa: conheça sobre os padrões
+DISCUTIR NO FÓRUM
+Nesta aula alguns novos padrões para criação de APIs foram introduzidos, mostrando possibilidades diferentes da mais padrão, que é a arquitetura REST.
+
+Que tal conhecer um pouco sobre cada uma dessas alternativas? Acesse a página oficial de cada uma das tecnologias citadas para entender seu propósito, vantagens e desvantagens.
+
+Opinião do instrutor
+•
+
+Opções
+Conheça sobre gRPC na documentação oficial: https://grpc.io/
+Aprenda também sobre GraphQL;
+a) No site oficial da tecnologia: https://graphql.org/
+b) Em conteúdos aqui na Alura, como por exemplo esse Alura+ que mostra como fazer um Hello World em GraphQL com JS: Criando seu hello world com GraphQL | Alura+
+Veja um exemplo prático do uso de WebHooks com a API do GitHub: https://docs.github.com/pt/webhooks
+
+https://grpc.io/
+
+https://graphql.org/
+
+https://cursos.alura.com.br/extra/alura-mais/criando-seu-hello-world-com-graphql-c111
+
+https://docs.github.com/pt/webhooks
+
+@@06-O que aprendemos?
+DISCUTIR NO FÓRUM
+Nesta aula, nós:
+
+Conhecemos padrões antigos de criação de APIs (ou WebServices, como eram chamados) como SOAP;
+Aprendemos sobre REST, que é o padrão mais conhecido e mais comum para a criação de APIs;
+Estudamos os padrões mais recentes e com propósitos mais específicos, como GraphQL e gRPC;
+Conhecemos o conceito de webhooks, que é bastante simples e amplamente utilizado na web.
+
+
