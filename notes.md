@@ -1122,4 +1122,495 @@ Aprendemos sobre REST, que é o padrão mais conhecido e mais comum para a cria�
 Estudamos os padrões mais recentes e com propósitos mais específicos, como GraphQL e gRPC;
 Conhecemos o conceito de webhooks, que é bastante simples e amplamente utilizado na web.
 
+#04/07/2026
+
+@04-Modelagem de API
+
+@@01-Parâmetros de query
+
+Agora, vamos discutir sobre modelagem de APIs. Este é um tema que poderia ser abordado em um curso inteiro. Portanto, vamos nos ater a pormenores para entender algumas das possibilidades que precisamos considerar ao modelar e criar uma API.
+
+Modelagem de API
+
+Primeiro, vamos criar um contexto para se trabalhar, acessando a página do mockapi.io, onde temos apenas um curso cadastrado.
+
+Vamos clicar no botão "Generate All" (Gerar Tudo) ao lado direito do endpoint da API. Isso vai gerar dados fictícios para os nossos cursos, criando vários recursos fictícios na nossa API. Com isso, temos agora 50 cursos.
+
+Podemos acessar o Postman novamente, ou outro cliente HTTP, fazer uma requisição do tipo GET para buscar todos os cursos e sem corpo. Para isso, na aba "Body", vamos selecionar a opção "none".
+
+GET:
+
+
+Copiar
+https://663f92fbe3a7c3218a4d6d9d.mockapi.io/api/cursos
+
+Agora teremos vários resultados:
+
+
+Copiar
+[
+
+  {
+
+    "data_criacao": "2024-05-11T10:29:25.554Z",
+
+    "titulo": "Curso de API",
+
+    "descricao": "Descrição teste",
+
+    "id": "1"
+
+  },
+
+  {
+
+    "data_criacao": "2024-05-11T03:05:27.702Z",
+
+    "titulo": "Towne Group",
+
+    "descricao": "magnam",
+
+    "id": "2"
+
+  },
+
+  {
+
+    "data_criacao": "2024-05-11T04:27:30.725Z",
+
+    "titulo": "Franecki, Hudson and Nicolas",
+
+    "descricao": "Itaque explicabo rem aut neque nam. Quaerat architecto praesentium ex maiores eveniet. Autem earum accusantium ab mollitia corporis sunt. Perferendis laboriosam repellendus doloribus totam officia harum magni debitis quia. Repudiandae nesciunt at facilis temporibus laborum. Iste veritatis cum id nobis a inventore iure. Sed magnam perspiciatis nobis quae eaque quaerat ipsa omnis autem. Harum ipsa laboriosam reprehenderit provident adipisci ipsam non quae. Mollitia perspiciatis illo qui ullam dolorum suscipit. Totam fugit id accusantium libero sapiente nihil accusantium itaque expedita. Maxime modi molestiae qui odit blanditiis sapiente officia voluptate ad.",
+
+    "id": "3"
+
+  },
+
+    …
+
+]
+
+Note que temos muitos dados, incluindo descrições e títulos falsos. Isso é um detalhe que adicionamos ao gerar dados utilizando o Faker quando criamos a API.
+
+Filtro
+
+Imagine que queremos buscar todas as informações, todos os cursos que têm uma determinada palavra no título. Como podemos realizar filtros em uma API que está seguindo o padrão REST?
+
+No GraphQL, temos uma query a ser montada. No GRPC, ou qualquer outro padrão RPC, temos os parâmetros que podemos enviar ou não. Isso tudo já é um pouco mais claro.
+
+Mas quando estamos utilizando um padrão um pouco mais aberto, como é o caso do REST, precisamos especificamente e de forma deliberada pensar em como vamos realizar esse tipo de tarefa.
+
+Uma das opções mais comuns de filtragem é a utilização de Query Parameters (Parâmetros de Consulta), para passar algumas informações a mais.
+
+Alguns cenários podem ser feitos também através de headers. Mas, nesse caso, não estamos enviando informações a mais sobre a requisição. O filtro faz parte da requisição. Portanto, vamos adicionar Query Parameters.
+
+Um Query Parameter é um parâmetro que passamos na URL. Após /cursos, adicionamos um ponto de interrogação (?), indicando que, a partir dali, tudo que estamos enviando é um parâmetro. Antes dele, está o endpoint, ou seja, o endereço que queremos acessar. Depois dele, são parâmetros que queremos passar.
+
+Uma das possibilidades para realizar filtro é utilizar o nome do campo que queremos buscar, como chave, igual ao que queremos buscar. Por exemplo, se queremos buscar um nome de empresa que contenha a palavra "Beer", definimos: titulo=Beer.
+
+GET:
+
+
+Copiar
+https://663f92fbe3a7c3218a4d6d9d.mockapi.io/api/cursos?titulo=Beer
+
+Quando enviamos a requisição, descobrimos que existe uma empresa com "Beer" no nome.
+
+
+Copiar
+[
+
+    {
+
+        "data_criacao": "2024-05-10T23:17:20.510Z",
+
+        "titulo": "Wyman, Beer and Greenholt",
+
+        "descricao": "Voluptatibus accusamus tempore atque nam. Magni adipisci delectus labore sequi. Voluptate impedit saepe deleniti cum tenetur expedita.",
+
+        "id": "14"
+
+    }
+
+]
+
+Podemos utilizar Query Parameters para realizar algumas operações.
+
+E como sabíamos que esse filtro era possível? Porque o Mock API nos fornece uma documentação. Em uma API real, essa documentação precisaria ser fornecida também.
+
+No GitHub do Mock API, temos um link para a Wiki do mockapi.io. Nela, podemos conferir a seção de Filtering, o filtro que acabamos de fazer, e também a seção de Pagination (paginação).
+
+Paginação
+
+No nosso cenário, quando buscamos todos os cursos, temos um total de 50 cursos, que já é uma quantia considerável. Mas imagine uma API de verdade.
+
+Por exemplo, existem mais de mil cursos na Alura. Imagine que enviemos mil itens na resposta de uma API. Além do mais, um curso na Alura tem mais informações do que apenas título e descrição.
+
+Isso tornaria esse endpoint extremamente lento e pesado. Ou seja, além dele demorar para carregar, porque ele tem que transferir muitos dados, ele também custaria muito de banda. Por exemplo, se acessarmos pela internet do celular, cada dado trafegado tem custo. Portanto, seria muito problemático transferir todos esses dados.
+
+Quando estamos modelando uma API, precisamos pensar em reduzir a banda trafegada. Para não só melhorar a performance, mas também diminuir o custo.
+
+Tanto do servidor, que pode ter cobrança por banda na rede, quanto do cliente, que pode estar acessando por uma rede limitada, como é o caso de rede de celular. Portanto, é muito importante pensarmos nesse cenário.
+
+A solução mais comum, além do cache para evitar que requisições sejam feitas, é a paginação.
+
+Ao invés de receber todos os 50 cursos, queremos limitar e pegar somente os 10 primeiros cursos. Depois de ler todos esses 10, podemos ir para uma segunda página e ler mais 10.
+
+O Mock API fornece isso também através de Query Parameters. Na URL, após /cursos, vamos informar que o limit é igual a 10 e estamos na page igual a 1.
+
+Note que esses parâmetros são separados pelo "E" comercial (&).
+
+GET:
+
+
+Copiar
+https://663f92fbe3a7c3218a4d6d9d.mockapi.io/api/cursos?limit=10&page=1
+
+No Postman, podemos adicionar esses Query Parameters na aba "Params" localizado abaixo do campo da URL. Quando estamos em uma requisição GET e adicionamos parâmetros nesse aba, eles já são adicionados na URL.
+
+Ao realizar essa requisição, teremos menos dados. Note que o primeiro curso na página 1 é o "Curso de API", cujo ID é 1.
+
+
+Copiar
+[
+
+    {
+
+        "data_criacao": "2024-05-11T10:29:25.554Z",
+
+        "titulo": "Curso de API",
+
+        "descricao": "Descrição teste",
+
+        "id": "1"
+
+    },
+
+    …
+
+    {
+
+        "data_criacao": "2024-05-10T20:32:26.110Z",
+
+         "titulo": "Gleichner, Yost and Langosh",
+
+        "descricao": "Esse repudiandae ab facere dicta alias.",
+
+        "id": "10"
+
+    }
+
+]
+
+Se mudarmos a página para page=2 e fizermos a requisição novamente, o primeiro curso será outro completamente diferente de "Caroll - Crooks" com ID 11. Dessa forma, conseguimos trafegar menos dados.
+
+Ordenação
+
+Quando estamos limitando, ou seja, paginando, precisamos partir de alguma ordenação.
+
+Por padrão, o Mock API ordena pelo ID. Mas e se quiséssemos ordenar pelo título? Podemos utilizar outro parâmetro chamado sortBy ou orderBy.
+
+De novo, esses dois são fornecidos na documentação do Mock API. Quando você estiver modelando uma API, você pode escolher outro nome que possa fazer sentido e etc.
+
+Nesse exemplo, vamos acessar a página 1 e ordenar pelo titulo.
+
+GET:
+
+
+Copiar
+https://663f92fbe3a7c3218a4d6d9d.mockapi.io/api/cursos?limit=10&page=1&orderBy=titulo
+
+Dessa forma, esperamos que o primeiro curso comece com letra A ou algumas das primeiras letras do alfabeto. Assim, ordenamos por outro critério.
+
+
+Copiar
+[
+
+    {
+
+        "data_criacao": "2024-05-11T14:50:07.257Z",
+
+        "titulo": "Abshire - Abbott",
+
+        "descricao": "libero",
+
+        "id": "36"
+
+    },
+
+    …
+
+]
+
+Além disso, podemos ainda selecionar se é crescente ou decrescente. Na seção de "Sorting" (ordenação) da documentação, descobrimos que a order pode ser asc de ascending (crescente), ou desc de descending (decrescente).
+
+Nesse caso, ordenaremos de forma descendente, adicionando um "E" comercial e informando que order é igual a desc.
+
+GET:
+
+
+Copiar
+https://663f92fbe3a7c3218a4d6d9d.mockapi.io/api/cursos?limit=10&page=1&orderBy=titulo&order=desc
+
+Com isso, agora o primeiro elemento é com a letra Y, no nosso caso. Pode ser até com a letra Z, no seu caso, quando você gerar os itens.
+
+
+Copiar
+[
+    {
+        "data_criacao": "2024-05-10T21:29:52.889Z",
+        "titulo": "Yundt LLC",
+        "descricao": "Quibusdam pariatur tenetur culpa minima.\nEarum quas est repudiandae dicta dolore.\nIncidunt officiis voluptate dolor iusto.",
+        "id": "26"
+    },
+    …
+]
+
+Conclusão
+
+Note que quando modelamos uma API, precisamos pensar em muitos detalhes. Se será necessária ordenação e paginação ou alguma outra forma para economizar recursos. Por exemplo, um controle mais fino de cache ou uma compressão de dados mais interessantes - o qual pode ser configurado até no servidor web, nem precisa ser na criação da aplicação em si.
+
+Também precisamos analisar se vamos realizar filtros e, se sim, que tipo de filtros vamos permitir.
+
+No Mock API, o filtro é feito por comparação. Então, se buscamos por API no título, ele vai retornar todos os cursos que contenham API no título. Mas poderia ser por exatidão, retornando apenas os cursos cujo nome seja exatamente "API". Ou até poderíamos permitir buscas onde o ID é maior do que 30.
+
+Precisamos pensar se esses cenários serão necessários ou não para a nossa API, e como vamos expor isso para a clientela. Reforçamos que isso precisa ser documentado.
+
+No próximo vídeo, vamos citar um termo bastante comentado no mundo do padrão REST, que inclusive traz algumas confusões, porque assim como paginação, ordenação, filtro, ele não tem exatamente uma única forma de ser feito, mas pode trazer muitas vantagens. Inclusive, o Mock API não faz.
+
+@@02-HATEOAS
+
+Entendemos que a modelagem de uma API é muito importante e precisamos pensar no que vamos receber como parâmetro e o que vamos devolver, bem como a forma de devolução.
+
+HATEOAS
+
+Imagine o seguinte cenário sobre devolução: temos um curso no qual alguma pessoa estudante pode se matricular.
+
+No entanto, o curso pode estar desativado, então a operação de matrícula não está disponível. Esse curso pode ser de algum nível administrativo, o que significa que nunca pode ser removido. Ou talvez seja um curso comum que pode ser removido. Talvez ele possa ter transições de status.
+
+Todas essas possibilidades para alterar um recurso podem ser documentadas e explicadas para que quem é cliente saiba como realizar essas operações e chamar a API corretamente. Mas, podemos utilizar um padrão bastante comum em aplicações RESTful, que é o Hypermedia as the Engine of Application State (HATEOAS).
+
+A ideia é ter hipermídia como motor do estado da aplicação. O que isso significa? Além das informações do recurso, vamos passar algo mais para ser um motor de informação sobre o que pode ser realizado em cima desse recurso.
+
+No cenário de um curso que pode ou não receber matrículas, além de ter todos os detalhes do curso, vamos ter a informação de endpoint para a matrícula. Se a pessoa estudante não pode se matricular, então não informamos esse endpoint.
+
+Para as demais operações possíveis de se realizar com esse curso, poderíamos adicionar os links para os endpoints - seja matrícula, exclusão ou qualquer outra operação.
+
+Exemplos de implementação
+
+Na própria página da Wikipedia, que fala sobre Hypermedia as the engine of application state, tem um exemplo interessante.
+
+Imagine que estamos buscando os detalhes de uma conta com ID 12345.
+
+
+Copiar
+GET /accounts/12345 HTTP/1.1
+Host: bank.example.com
+
+Quando fazemos essa requisição, recebemos os dados não só da conta (como o número da conta e saldo), mas também recebemos os links das operações que podemos realizar.
+
+Para essa conta, nesse estado, são possíveis as operações de depósito, saques, transferências e pedido de fechamento.
+
+
+Copiar
+HTTP/1.1 200 OK
+
+{
+    "account": {
+        "account_number": 12345,
+        "balance": {
+            "currency": "usd",
+            "value": 100.00
+        },
+        "links": {
+            "deposits": "/accounts/12345/deposits",
+            "withdrawals": "/accounts/12345/withdrawals",
+            "transfers": "/accounts/12345/transfers",
+            "close-requests": "/accounts/12345/close-requests"
+        }
+    }
+}
+
+Quem for cliente pode utilizar essa informação a mais para montar a própria UI, ou seja, a interface para mostrar um botão para realizar depósito, um botão para pedir o fechamento da conta, etc.
+
+Agora, imagine que a conta esteja com saldo negativo. Obviamente, não vamos mostrar um botão de sacar ou um botão de realizar transferência, porque não podemos fazer isso.
+
+Nesse caso, devolvemos somente o link de depósito - somente as operações que podem ser realizadas.
+
+
+Copiar
+HTTP/1.1 200 OK
+
+{
+    "account": {
+        "account_number": 12345,
+        "balance": {
+            "currency": "usd",
+            "value": -25.00
+        },
+        "links": {
+            "deposits": "/accounts/12345/deposits"
+        }
+    }
+}
+
+Utilizar essa informação a mais pode facilitar a vida da clientela e pode trazer uma informação muito valiosa.
+
+Na página da Wikipédia de Hypermedia as the Engine of Application State, esse item links foi adicionado com a ação pode ser realizada e o endpoint para essa ação.
+
+Contudo, existem diversos padrões para fazer isso. Pegamos outro padrão para te mostrar na documentação do Spring Framework, que é um framework Java para criação de aplicações web.
+
+Na parte sobre Hypermedia as the Engine of Application State, explica-se que o Spring Framework segue o padrão HAL.
+
+
+Copiar
+{
+    "firstName": "Frodo",
+    "lastName": "Baggins",
+    "role" : "ring bearer",
+    "_links" : {
+        "self" : {
+            "href" : "/employees/1"
+        }
+    }
+}
+
+Além das informações do recurso, adicionamos uma nova entrada, _links, que será um objeto.
+
+A chave desse objeto será para qual recurso estamos nos referindo. Por exemplo, no caso do curso, estamos trabalhando com um curso e uma pessoa estudante poderia se matricular. Então, a primeira chave de _links seria "student" ou "estudante".
+
+E aí, a operação que vamos realizar, por exemplo, "enroll" ou "matricular" e, depois, o valor será o endpoint para matricular a pessoa estudante nesse curso.
+
+Podemos passar mais informações seguindo esse padrão. Inclusive, esse padrão se chama Hypertext Application Language. Existiu até um rascunho para tornar isso uma especificação.
+
+No momento da gravação, ele não saiu de rascunho e até já expirou. Mas, existem várias versões desse rascunho que é atualizado e discutido de forma constante.
+
+Hypertext Application Language (HAL) é um formato um pouco mais específico para adicionar essa hipermídia, esses links a mais na nossa aplicação.
+
+Isso faz parte da modelagem e da tomada de decisão na hora de criar uma API, analisando se isso será de utilidade.
+
+Se você está criando uma API para que uma equipe na nossa empresa utilize, é preciso conversar com essa equipe. Se é uma API que você vai disponibilizar para toda a clientela da empresa, vale mais a pena utilizar esses recursos.
+
+Conclusão
+
+A tomada de decisão, para utilizar algum recurso ou não, faz parte da criação de uma API.
+
+Falando em modelagem, escolhemos chamar o nome do curso de titulo e as informações a mais desse curso de descricao. Contudo, e se posteriormente, recebemos um requisito de produto informando que o titulo agora deve se chamar nome.
+
+Como mudamos essa informação sem quebrar o cliente de todo mundo que está utilizando essa API? Vamos conversar sobre versionamento de APIs no próximo vídeo.
+
+@@03-Versionamento
+
+Na modelagem da API, identificamos que o título do curso seria chamado de titulo, mas agora produto solicitou uma alteração para que esse campo se chame nome.
+
+Claro, esse é um caso pequeno de mudança, no entanto, podem ocorrer algumas alterações mais destrutivas.
+
+Por exemplo, antes informávamos o tempo de duração desse curso, mas agora produto decidiu que o tempo de duração é muito variável, portanto, não teremos mais esse dado.
+
+Ou então, antes informávamos pré-requisitos, agora não teremos mais. Ou ainda, o formato desses pré-requisitos mudaram. Antes eram vários links para os cursos que são pré-requisitos, agora são apenas os títulos.
+
+Podemos ter diversas modificações na API que quebrariam o cliente. E, novamente, se estamos criando uma API que só será utilizada por uma equipe na empresa, podemos discutir e combinar essas modificações.
+
+Contudo, se estivéssemos disponibilizando uma API para um grande público, como toda a clientela da empresa, não seria nada profissional informar apenas "isso vai mudar, corrija o seu código".
+
+Para esses cenários, podemos utilizar versionamento de APIs.
+
+Versionamento de API
+
+Na hora de criar o projeto de API de cursos, nos foi solicitado um prefixo. Um exemplo de prefixo era /api/v1 para definir uma versão inicial para a API.
+
+Com isso, quando precisássemos modificar algo que quebrasse o cliente, não alteraríamos o endpoint atual. Ao invés disso, criamos um novo controller em nosso código, que vem de uma nova rota, para /api/v2/cursos.
+
+Nessa busca de cursos, vamos pegar os cursos da mesma forma, reutilizando o código, mas na hora de responder, vamos transformar essa informação.
+
+Ao invés de devolver o link de cada um dos cursos de pré-requisitos, vamos devolver apenas nomes. Ao invés de devolver titulo como chave para identificar o curso, será nome. Assim, realizamos as transformações necessárias, modificando a resposta.
+
+O versionamento de API permite realizar modificações do lado do servidor, sem quebrar o cliente.
+
+Depois, podemos realizar um comunicado a clientela informando que existe uma nova versão da API e por quanto tempo a versão antiga será mantida para que possam se atualizar.
+
+O motivo de não trazer nenhum exemplo prático, é porque a parte técnica é muito simples de implementar. Basta ter uma nova rota que devolve a resposta no novo formato, além de manter a antiga por um tempo.
+
+O ponto principal do versionamento da API é a parte teórica, da modelagem - de conversar com a equipe de produto e com a clientela.
+
+Afinal, o versionamento da API vai muito além do código, é muito importante que uma equipe saiba comunicar para a clientela como essa atualização será feita. E, nós que trabalhamos com a parte técnica, precisamos estar cientes disso.
+
+Dependendo de como o contrato é feito, talvez você precise de uma equipe jurídica para formalizar esse novo contrato de atualização, especificando que existe esse período de atualização. Ou talvez essa parte já esteja no contrato quando você criar a API.
+
+Apesar do versionamento ser fácil de aplicar, o que envolve essas alterações é muito mais complexo. Portanto, é muito importante entender o processo no qual estamos trabalhando.
+
+Ressaltamos que a criação de uma API para poucas pessoas e outra API para várias pessoas exige abordagens diferentes.
+
+Para uma API interna, como quando um colega de trabalho cria o front-end e você a API, é fácil ajustar detalhes através de uma conversa direta, chegando rapidamente a um acordo.
+
+Por outro lado, ao criar uma API fornecida diretamente para o acesso de uma vasta clientela, é necessário um planejamento mais detalhado. A equipe de suporte ao consumidor precisa estar envolvida para informar clientes sobre possíveis atualizações, reconhecendo que o contexto e as necessidades dos usuários finais devem ser considerados cuidadosamente.
+
+A parte técnica é semelhante, mas o contexto de uso e as partes envolvidas variam significativamente.
+
+Um ponto crucial na modelagem de APIs é entender onde sua API vai ser utilizada e em que contexto ela está inserida, para que você tome as decisões mais adequadas.
+
+Próximos passos
+
+Falando em contexto e tomada de decisões, temos trabalhado com recursos "estáticos", mas existem alguns cenários onde queremos trabalhar em tempo real.
+
+Por exemplo, queremos criar uma API que atualize a previsão do tempo do local onde a pessoa usuária está. No cenário dos cursos, podemos atualizar quantas pessoas já finalizaram esse curso em tempo real.
+
+Quais são as estratégias para trabalhar com eventos e atualização em tempo real, quando estamos falando de API?
+
+Na próxima aula, abordaremos diferentes técnicas de comunicação de tempo real.
+
+@@04-Decisões de negócio
+DISCUTIR NO FÓRUM
+Pedro faz parte de uma equipe que vai criar uma API que será acessada por diversas empresas clientes. Pedro sugeriu que a equipe utilizasse versionamento nessa API para facilitar a evolução técnica como modificações de endpoints, mas a equipe de negócios teme que isso faça com que o prazo de entrega da API aumente.
+
+Quais as vantagens, para a equipe de negócio, da utilização de versionamento de APIs?
+
+Selecione uma alternativa:
+
+A
+Facilitação na evolução dos endpoints podendo quebrar a compatibilidade, já que podemos criar uma nova versão.
+
+
+B
+Possibilidade de rollback de um deploy em caso de erro ao colocar a API em produção.
+
+
+Facilitação na criação de contratos e fornecimento de prazos para descontinuação de funcionalidades.
+
+Ao termos versões de APIs, fica mais fácil oferecer contratos que garantam a disponibilidade de determinados endpoints por um período, mesmo após serem marcados como obsoletos. Com isso, a equipe técnica consegue evoluir o projeto e a equipe de negócios consegue se comunicar de forma clara e também facilitar a vida do cliente.
+
+
+D
+Não há vantagens para equipes não técnicas no uso de versionamento de APIs.
+
+@@05-Mão na massa: pratique e altere sua API
+DISCUTIR NO FÓRUM
+Nós focamos na modelagem de APIs nessa aula, falando principalmente de padrões normalmente utilizados em APIs RESTful. Que tal praticarmos alguns desses conceitos?
+
+Caso você, assim como eu, tenha criado sua API sem versionamento, exclua o projeto e crie um novo com o prefixo contendo uma versão. Além disso, experimente os filtros fornecidos pela API via query parameters.
+
+Caso tenha dúvidas para fazer esse procedimento, clique na “Opinião da pessoa instrutora”.
+
+Opinião do instrutor
+•
+
+Opções
+Acesse seu projeto no https://mockapi.io/ e crie o projeto com o prefixo v1 para indicar uma versão da API;
+Utilize os parâmetros de filtro, paginação e ordenação da API: https://github.com/mockapi-io/docs/wiki/Code-examples#filtering;
+Pesquise mais sobre HATEOAS e possíveis padrões para uso dessa técnica, como o HAL.
+
+https://mockapi.io/
+
+https://github.com/mockapi-io/docs/wiki/Code-examples#filtering
+
+https://en.wikipedia.org/wiki/Hypertext_Application_Language
+
+@@06-O que aprendemos?
+DISCUTIR NO FÓRUM
+Nesta aula, nós:
+
+Conhecemos o conceito de modelagem de APIs e quais tomadas de decisão podem estar envolvidas nesse processo;
+Aprendemos sobre o uso de parâmetros na URL para tarefas comuns, como filtro, ordenação e paginação;
+Conhecemos o famoso padrão HATEOAS de APIs RESTful, que utiliza links para auxílio aos clientes no uso da API;
+Estudamos a importância de versionamento de APIs, tanto para a área técnica quanto para a área de negócios.
 
